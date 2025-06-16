@@ -1,0 +1,100 @@
+.infoBlock {
+  width: 350px;
+  padding: 1rem;
+  background-color: #2c3e50;
+  color: white;
+  border-radius: 8px;
+
+  margin-right: 1rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.3rem;
+  color: #f1c40f;
+}
+
+.gameObjective,
+.turnInfo,
+.movesLeft,
+.timeControls,
+.moveHistory {
+  margin-bottom: 1.5rem;
+}
+
+.gameObjective p {
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+.playerIndicator {
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.white {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+}
+
+.black {
+  background-color: #34495e;
+  color: white;
+}
+
+.movesCount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.timeDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.time {
+  padding: 0.3rem;
+  border-radius: 4px;
+}
+
+.whiteTime {
+  background-color: rgba(236, 240, 241, 0.2);
+}
+
+.blackTime {
+  background-color: rgba(52, 73, 94, 0.5);
+}
+
+.movesList {
+  margin-top: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.move {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.move:last-child {
+  border-bottom: none;
+}
+
+h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #f1c40f;
+}
