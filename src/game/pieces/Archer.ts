@@ -72,4 +72,38 @@ export class Archer extends Piece {
     }
     return attacks;
   }
+
+  protected getMovementType(): string {
+    return "Обычное передвижение в радиусе одной клетки";
+  }
+
+  protected getMovementRange(): number {
+    return 2;
+  }
+
+  protected getAttackType(): string {
+    return "Дистанционная атака из лука по вертикали, горизонтали и диагонали";
+  }
+
+  protected getAttackRange(): number {
+    return 3;
+  }
+
+  protected getPieceSkills() {
+    const baseSkills = super.getPieceSkills();
+    /*
+    baseSkills.push(
+      {
+        name: "Точный выстрел",
+        description: "Увеличивает урон на 50% на следующую атаку",
+        cooldown: 2,
+      },
+      {
+        name: "Дождь стрел",
+        description: "Атакует все цели в радиусе 2 клеток",
+        cooldown: 4,
+      }
+    );*/
+    return baseSkills;
+  }
 }

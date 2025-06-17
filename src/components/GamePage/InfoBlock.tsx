@@ -19,24 +19,24 @@ function InfoBlock({
   return (
     <div className={styles.infoBlock}>
       <h2 className={styles.title}>Информация об игре</h2>
-      
+
       <div className={styles.gameObjective}>
         <h3>Цель игры:</h3>
         <p>Разрушить замок или уничтожить короля</p>
       </div>
-      
+
       <div className={styles.turnInfo}>
         <h3>Текущий ход:</h3>
         <div className={`${styles.playerIndicator} ${styles[currentPlayer]}`}>
           {currentPlayer === "white" ? "Белые" : "Чёрные"}
         </div>
       </div>
-      
+
       <div className={styles.movesLeft}>
         <h3>Осталось ходов:</h3>
         <div className={styles.movesCount}>{movesLeft}</div>
       </div>
-      
+
       <div className={styles.timeControls}>
         <h3>Время:</h3>
         <div className={styles.timeDisplay}>
@@ -48,7 +48,7 @@ function InfoBlock({
           </span>
         </div>
       </div>
-      
+
       <div className={styles.moveHistory}>
         <h3>История ходов:</h3>
         <div className={styles.movesList}>

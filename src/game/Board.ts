@@ -48,7 +48,7 @@ export class Board {
     }
 
     // Инициализация фигур с использованием новых классов
- 
+
     this.pieces[7][3] = new King(1); // Король белых
     this.pieces[6][4] = new Pawn(1); // Пешка белых
     this.pieces[6][3] = new Pawn(1); // Пешка белых
@@ -73,8 +73,6 @@ export class Board {
     this.pieces[0][6] = new Knight(2);
     this.pieces[0][2] = new Archer(2);
     this.pieces[0][5] = new Archer(2);
-    
-
   }
 
   draw() {
@@ -245,6 +243,17 @@ export class Board {
 
         // Если было совершено действие (ход или атака), уменьшаем ходы и, если нужно, меняем игрока
         if (actionTaken) {
+          this.recordMove(
+            this.selectedPos,
+            pos,
+            targetPiece || isCastleAttack
+              ? isCastleAttack
+                ? "castle-attack"
+                : "attack"
+              : "move",
+            attacker,
+            targetPiece
+          );
           console.log("Уменьшаем количество ходов");
           this.movesLeft--;
           if (this.movesLeft <= 0) {
@@ -431,5 +440,54 @@ export class Board {
       h.destroy();
     }
     this.highlightTiles = [];
+  }
+
+  // В классе Board добавьте:
+  private recordMove(
+    from: BoardPosition,
+    to: BoardPosition,
+    action: "move" | "attack" | "castle-attack",
+    piece: Piece,
+    target?: Piece | null
+  ) {
+    const pieceName = this.getPieceName(piece.type, piece.owner);
+    const fromPos = this.positionToChessNotation(from);
+    const toPos = this.positionToChessNotation(to);
+
+    let moveDescription = "";
+
+    switch (action) {
+      case "move":
+        moveDescription = `${pieceName} походил (${fromPos}-${toPos})`;
+        break;
+      case "attack":
+        const targetName = target
+          ? this.getPieceName(target.type, target.owner)
+          : "фигура";
+        moveDescription = `${pieceName} атаковал ${targetName} (${fromPos}x${toPos})`;
+        break;
+      case "castle-attack":
+        moveDescription = `${pieceName} атаковал замок врага (${fromPos}x${toPos})`;
+        break;
+    }
+
+    (this.scene as MainScene).addMoveToHistory(moveDescription);
+  }
+
+  private positionToChessNotation(pos: BoardPosition): string {
+    const letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    return `${letters[pos.x]}${8 - pos.y}`;
+  }
+
+  private getPieceName(type: PieceType, owner: number): string {
+    const names: Record<PieceType, string> = {
+      king: "Король",
+      pawn: "Пешка",
+      knight: "Конь",
+      archer: "Лучник",
+      cannon: "Пушка",
+      mage: "Маг",
+    };
+    return `${names[type]} ${owner === 1 ? "белых" : "чёрных"}`;
   }
 }

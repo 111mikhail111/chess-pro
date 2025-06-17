@@ -60,6 +60,21 @@ const GamePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const handleMoveRecorded = (moveDescription: string) => {
+      setGameState((prev) => ({
+        ...prev,
+        moveHistory: [...prev.moveHistory, moveDescription].slice(-50), // Ограничиваем историю 50 ходами
+      }));
+    };
+
+    EventBus.on("move-recorded", handleMoveRecorded);
+
+    return () => {
+      EventBus.off("move-recorded", handleMoveRecorded);
+    };
+  }, []);
+
+  useEffect(() => {
     if (gameRef.current) {
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,

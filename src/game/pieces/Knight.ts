@@ -46,4 +46,71 @@ export class Knight extends Piece {
       return targetPiece && targetPiece.owner !== this.owner;
     });
   }
+
+  // Добавляем новые методы для информации о движении и атаке
+  getMovementInfo(): { type: string; range: number } {
+    return {
+      type: this.getMovementType(),
+      range: this.getMovementRange(),
+    };
+  }
+
+  getAttackInfo(): { type: string; range: number; damage: number } {
+    return {
+      type: this.getAttackType(),
+      range: this.getAttackRange(),
+      damage: this.attack,
+    };
+  }
+
+  getSkills(): Array<{ name: string; description: string; cooldown: number }> {
+    return this.getPieceSkills();
+  }
+
+  // Защищенные методы для переопределения в дочерних классах
+  protected getMovementType(): string {
+    return "Буквой г";
+  }
+
+  protected getMovementRange(): number {
+    return 2.5;
+  }
+
+  protected getAttackType(): string {
+    return "Как передвижение";
+  }
+
+  protected getAttackRange(): number {
+    return 2.5;
+  }
+
+  protected getPieceSkills() {
+    const baseSkills = [
+      {
+        name: "Базовая наскок",
+        description: "Обычная атака без особых эффектов",
+        cooldown: 0,
+      },
+    ];
+
+    // Добавляем уникальные навыки для конкретных фигур
+    
+
+    return baseSkills;
+  }
+
+  // Метод для получения всей информации о фигуре
+  getFullInfo() {
+    return {
+      name: this.type,
+      stats: {
+        level: this.level,
+        health: this.hp,
+        attack: this.attack,
+      },
+      movement: this.getMovementInfo(),
+      attack: this.getAttackInfo(),
+      skills: this.getSkills(),
+    };
+  }
 }

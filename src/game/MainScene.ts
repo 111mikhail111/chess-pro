@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Board } from "./Board";
-import EventBus from './EventBus';
+import EventBus from "./EventBus";
 import type { BoardPosition, Piece } from "./Piece";
 
 export class MainScene extends Phaser.Scene {
@@ -12,7 +12,7 @@ export class MainScene extends Phaser.Scene {
 
   handleGameUpdate() {
     // Отправляем данные о текущем состоянии игры
-    EventBus.emit('game-update', {
+    EventBus.emit("game-update", {
       currentPlayer: this.board.currentPlayer,
       movesLeft: this.board.movesLeft,
       // другие данные...
@@ -20,18 +20,29 @@ export class MainScene extends Phaser.Scene {
   }
 
   handlePieceSelected(piece: Piece, position: BoardPosition) {
-    
-    EventBus.emit('piece-selected', {
-      name: piece.type,
-      stats: {
-        level: piece.level,
-        health: piece.hp,
-        attack: piece.attack
-      },
-      movement: null,
-      attack: null,
-      skills: null
-    });
+    try {
+      // Используем новый метод getFullInfo()
+      const pieceData = piece.getFullInfo();
+      console.log("Emitting piece data:", pieceData);
+      EventBus.emit("piece-selected", pieceData);
+    } catch (error) {
+      console.error("Error in handlePieceSelected:", error);
+      EventBus.emit("piece-selected", {
+        name: piece.type,
+        stats: {
+          level: piece.level,
+          health: piece.hp,
+          attack: piece.attack,
+        },
+        movement: null,
+        attack: null,
+        skills: null,
+      });
+    }
+  }
+
+  addMoveToHistory(moveDescription: string) {
+    EventBus.emit("move-recorded", moveDescription);
   }
 
   create() {

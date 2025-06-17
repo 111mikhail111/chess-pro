@@ -65,4 +65,58 @@ export class Cannon extends Piece {
     if (distance === 2) return this.attack * 1.5;
     return this.attack * 1;
   }
+
+  protected getMovementType(): string {
+    return "По вертикали и горизонтали";
+  }
+
+  protected getMovementRange(): number {
+    return 3; // Максимальная дистанция движения
+  }
+
+  protected getAttackType(): string {
+    return "Дистанционный выстрел по вертикали и горизонтали";
+  }
+
+  protected getAttackRange(): number {
+    return 3; // Максимальная дистанция атаки
+  }
+
+  protected getPieceSkills() {
+    return [
+      {
+        name: "Залповый огонь",
+        description:
+          "Наносит увеличенный урон на близкой дистанции (200% урона в соседней клетке)",
+        cooldown: 0,
+      },/*
+      {
+        name: "Орудийный расчет",
+        description: "Увеличивает дальность атаки на 1 клетку на 3 хода",
+        cooldown: 5,
+      },
+      {
+        name: "Бронебойный снаряд",
+        description: "Игнорирует 50% защиты цели",
+        cooldown: 3,
+      },*/
+    ];
+  }
+
+  // Дополнительный метод для специфичной информации пушки
+  getSpecialCharacteristics() {
+    return {
+      damageDescription:
+        "Урон уменьшается с расстоянием: 200% (1 клетка), 150% (2 клетки), 100% (3 клетки)",
+    };
+  }
+
+  // Переопределяем метод получения полной информации
+  getFullInfo() {
+    const baseInfo = super.getFullInfo();
+    return {
+      ...baseInfo,
+      special: this.getSpecialCharacteristics(),
+    };
+  }
 }
