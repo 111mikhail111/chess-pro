@@ -16,6 +16,7 @@ function Header() {
       <nav className={styles.navigation}>
         <a href="/" className={styles.navLink}>Game</a>
         <a href="/about" className={styles.navLink}>About</a>
+        <a href="/profile" className={styles.navLink}>Профиль</a>
       </nav>
       
       <div className={styles.themeToggle}>

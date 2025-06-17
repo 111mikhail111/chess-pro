@@ -5,6 +5,7 @@ import Header from './Header'; // Убедитесь, что Header.jsx пере
 // Импортируйте вашу новую страницу
 import AboutPage from './AboutPage'; // Предполагается, что вы создали этот файл
 import GamePage from './GamePage'; // Создадим этот компонент для вашей игры Phaser
+import ProfilePage from './ProfilePage';
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<GamePage />} /> {/* Основная страница игры */}
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           {/* Добавьте другие маршруты */}
         </Routes>
       </div>

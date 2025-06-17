@@ -14,7 +14,7 @@ export interface BoardPosition {
 }
 
 export class Board {
-  private scene: Phaser.Scene;
+  public scene: Phaser.Scene;
 
   public gridSize = 8;
   public tileSize = 85;
@@ -27,12 +27,12 @@ export class Board {
   public selectedPos: BoardPosition | null = null;
   public highlightTiles: Phaser.GameObjects.Rectangle[] = [];
 
-  private castleHP: { [key: number]: number } = {
+  public castleHP: { [key: number]: number } = {
     1: 100,
     2: 100,
   };
 
-  private castlePos: { [key: number]: BoardPosition } = {
+  public castlePos: { [key: number]: BoardPosition } = {
     1: { x: 4, y: 7 },
     2: { x: 4, y: 0 },
   };

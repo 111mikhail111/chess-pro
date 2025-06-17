@@ -1,6 +1,7 @@
 body, html {
   margin: 0;
   padding: 0;
+  background-color: #4a637c;
 }
 
 
@@ -41,6 +42,7 @@ body, html {
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s;
+  font-size: 1.5rem;
 }
 
 .navLink:hover {
