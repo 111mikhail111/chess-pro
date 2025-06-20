@@ -1,4 +1,9 @@
 import { type BoardPosition } from "./Board";
+import EventBus from "./EventBus";
+
+
+
+
 
 export type PieceType =
   | "king"
@@ -81,7 +86,6 @@ export class Piece {
       if (defender.hp <= 0) {
         boardPieces[defenderPos.y][defenderPos.x] = null; // <-- Здесь удаляем фигуру с доски
         if (defender.type === "king") {
-          alert(`👑 Игрок ${this.owner} победил, убив короля!`);
           return true; // Король уничтожен, игра закончена
         }
         return false; // Фигура уничтожена
@@ -101,9 +105,6 @@ export class Piece {
           : 2;
       castleHP[targetCastleOwner] -= this.attack;
       if (castleHP[targetCastleOwner] <= 0) {
-        alert(
-          `🔥 Игрок ${this.owner} победил, уничтожив замок игрока ${targetCastleOwner}!`
-        );
         return true; // Замок уничтожен
       }
     }

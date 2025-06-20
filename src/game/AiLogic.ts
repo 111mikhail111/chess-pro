@@ -14,19 +14,26 @@ export class AiLogic {
   }
 
   // Основной метод для вычисления лучшего хода
-  computeBestMove(): { from: BoardPosition; to: BoardPosition } | null {
+  async computeBestMove(): Promise<{
+    from: BoardPosition;
+    to: BoardPosition;
+  } | null> {
     const possibleMoves = this.getAllPossibleMoves(this.player);
+    console.log(`[AI] Всего возможных ходов: ${possibleMoves.length}`);
     if (possibleMoves.length === 0) return null;
 
     let bestMove = null;
     let bestValue = -Infinity;
 
-    // Оцениваем каждый возможный ход
     for (const move of possibleMoves) {
+      console.log(
+        `[AI] Пробуем ход: from ${JSON.stringify(
+          move.from
+        )} to ${JSON.stringify(move.to)}`
+      );
       // Делаем ход на копии доски
       const boardCopy = this.deepCopyBoard();
-      boardCopy.handleClick(move.from);
-      boardCopy.handleClick(move.to);
+      boardCopy.simulateMove(move.from, move.to);
 
       // Оцениваем позицию после этого хода
       const moveValue = this.minimax(
@@ -36,14 +43,27 @@ export class AiLogic {
         Infinity,
         false
       );
+      console.log(`[AI] Оценка хода: ${moveValue}`);
 
-      // Обновляем лучший ход, если нашли лучше
       if (moveValue > bestValue) {
         bestValue = moveValue;
         bestMove = move;
+        console.log(
+          `[AI] Новый лучший ход: from ${JSON.stringify(
+            move.from
+          )} to ${JSON.stringify(move.to)} (оценка: ${moveValue})`
+        );
       }
+
+      // Задержка для наглядности (например, 300 мс)
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
+    console.log(
+      `[AI] Лучший найденный ход:`,
+      bestMove,
+      `с оценкой: ${bestValue}`
+    );
     return bestMove;
   }
 
@@ -68,8 +88,7 @@ export class AiLogic {
 
       for (const move of moves) {
         const boardCopy = this.deepCopyBoard(board);
-        boardCopy.handleClick(move.from);
-        boardCopy.handleClick(move.to);
+        boardCopy.simulateMove(move.from, move.to);
 
         const evalResult = this.minimax(
           boardCopy,
@@ -89,8 +108,7 @@ export class AiLogic {
 
       for (const move of moves) {
         const boardCopy = this.deepCopyBoard(board);
-        boardCopy.handleClick(move.from);
-        boardCopy.handleClick(move.to);
+        boardCopy.simulateMove(move.from, move.to);
 
         const evalResult = this.minimax(
           boardCopy,

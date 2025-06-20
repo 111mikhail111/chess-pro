@@ -7,6 +7,8 @@ import { Knight } from "./pieces/Knight";
 import { Archer } from "./pieces/Archer";
 import { Mage } from "./pieces/Mage";
 import type { MainScene } from "./MainScene";
+import EventBus from "./EventBus";
+import type { Game } from "./Game";
 
 export interface BoardPosition {
   x: number;
@@ -15,6 +17,7 @@ export interface BoardPosition {
 
 export class Board {
   public scene: Phaser.Scene;
+  private levelId: number | null = null;
 
   public gridSize = 8;
   public tileSize = 85;
@@ -37,9 +40,15 @@ export class Board {
     2: { x: 4, y: 0 },
   };
 
+  // В классе Board
+  private boardTiles: Phaser.GameObjects.Rectangle[] = [];
+  private pieceSprites: Phaser.GameObjects.Image[] = [];
+  private hpTexts: Phaser.GameObjects.Text[] = [];
+  private castleSprites: Phaser.GameObjects.Image[] = [];
+  private castleHpTexts: Phaser.GameObjects.Text[] = [];
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
-
     for (let y = 0; y < this.gridSize; y++) {
       this.pieces[y] = [];
       for (let x = 0; x < this.gridSize; x++) {
@@ -48,7 +57,7 @@ export class Board {
     }
 
     // Инициализация фигур с использованием новых классов
-
+    /*
     this.pieces[7][3] = new King(1); // Король белых
     this.pieces[6][4] = new Pawn(1); // Пешка белых
     this.pieces[6][3] = new Pawn(1); // Пешка белых
@@ -73,10 +82,52 @@ export class Board {
     this.pieces[0][6] = new Knight(2);
     this.pieces[0][2] = new Archer(2);
     this.pieces[0][5] = new Archer(2);
+*/
+  }
+
+  public setLevelId(levelId: number): void {
+    this.levelId = levelId;
+  }
+
+  public getBoardPosition(
+    gameObject: Phaser.GameObjects.GameObject
+  ): BoardPosition | null {
+    // Получаем размеры сцены
+    const width = this.scene.sys.game.config.width as number;
+    const height = this.scene.sys.game.config.height as number;
+
+    // Смещаем поле по центру
+    const offsetX = (width - this.gridSize * this.tileSize) / 2;
+    const offsetY = (height - this.gridSize * this.tileSize) / 2;
+
+    // Получаем координаты объекта
+    const objX = (gameObject as any).x; // Приведение типа, так как Phaser не предоставляет явных типов
+    const objY = (gameObject as any).y;
+
+    // Вычисляем позицию на доске
+    const x = Math.floor((objX - offsetX) / this.tileSize);
+    const y = Math.floor((objY - offsetY) / this.tileSize);
+
+    // Проверяем, что позиция в пределах доски
+    if (x >= 0 && x < this.gridSize && y >= 0 && y < this.gridSize) {
+      return { x, y };
+    }
+    return null;
   }
 
   draw() {
-    this.scene.children.removeAll();
+    // В начале draw()
+    this.boardTiles.forEach((obj) => obj.destroy());
+    this.pieceSprites.forEach((obj) => obj.destroy());
+    this.hpTexts.forEach((obj) => obj.destroy());
+    this.castleSprites.forEach((obj) => obj.destroy());
+    this.castleHpTexts.forEach((obj) => obj.destroy());
+
+    this.boardTiles = [];
+    this.pieceSprites = [];
+    this.hpTexts = [];
+    this.castleSprites = [];
+    this.castleHpTexts = [];
 
     // Получаем размеры сцены
     const width = this.scene.sys.game.config.width as number;
@@ -99,8 +150,11 @@ export class Board {
             isLight ? 0xffffff : 0x888888
           )
           .setInteractive();
+        this.boardTiles.push(rect);
 
-        rect.on("pointerdown", () => this.handleClick({ x, y }));
+        rect.on("pointerdown", () => {
+          (this.scene as MainScene).handleBoardClick({ x, y });
+        });
 
         // фигура
         const piece = this.pieces[y][x];
@@ -110,7 +164,7 @@ export class Board {
             piece.owner === 1 ? `${piece.type}_white` : `${piece.type}_black`;
 
           // В центре клетки вставляем спрайт с фигурой
-          this.scene.add
+          const sprite = this.scene.add
             .image(
               offsetX + x * this.tileSize + this.tileSize / 2,
               offsetY + y * this.tileSize + this.tileSize / 2,
@@ -118,6 +172,7 @@ export class Board {
             )
             .setDisplaySize(this.tileSize * 0.8, this.tileSize * 0.8)
             .setOrigin(0.5);
+          this.pieceSprites.push(sprite);
 
           // Рисуем HP над фигурой
           const isLight = (x + y) % 2 == 0;
@@ -126,7 +181,7 @@ export class Board {
           const textColor = isLight ? "#000000" : "#ffffff";
           const strokeColor = isLight ? "#ffffff" : "#000000";
 
-          this.scene.add
+          const hpText = this.scene.add
             .text(
               offsetX + x * this.tileSize + this.tileSize / 2,
               offsetY +
@@ -143,6 +198,7 @@ export class Board {
               }
             )
             .setOrigin(0.5);
+          this.hpTexts.push(hpText);
         }
       }
     }
@@ -153,7 +209,7 @@ export class Board {
       const texture = +player === 1 ? "castle_white" : "castle_black";
 
       // вставляем спрайт замка
-      this.scene.add
+      const castleSprite = this.scene.add
         .image(
           offsetX + pos.x * this.tileSize + this.tileSize / 2,
           offsetY + pos.y * this.tileSize + this.tileSize / 2,
@@ -162,9 +218,10 @@ export class Board {
         .setDisplaySize(this.tileSize * 0.8, this.tileSize * 0.8)
         .setDepth(1)
         .setOrigin(0.5);
+      this.castleSprites.push(castleSprite);
 
       // выводим HP замка над картинкой
-      this.scene.add
+      const castleHpText = this.scene.add
         .text(
           offsetX + pos.x * this.tileSize + this.tileSize / 2,
           offsetY +
@@ -181,16 +238,28 @@ export class Board {
           }
         )
         .setOrigin(0.5);
+      this.castleHpTexts.push(castleHpText);
     }
 
     this.highlightMoves();
   }
 
   handleClick(pos: BoardPosition) {
+    console.log(
+      `[Board.handleClick] Вызван с позицией:`,
+      pos,
+      `Текущий игрок: ${this.currentPlayer}, Осталось ходов: ${this.movesLeft}`
+    );
     const piece = this.getPieceAt(pos);
 
     if (this.selectedPos) {
       // Есть выбранная фигура, пытаемся сделать ход или атаку
+      console.log(
+        `[Board.handleClick] Есть выбранная фигура:`,
+        this.selectedPos,
+        `Фигура:`,
+        this.getPieceAt(this.selectedPos)
+      );
       if (this.canMoveTo(pos)) {
         const attacker = this.getPieceAt(this.selectedPos)!;
         const targetPiece = this.getPieceAt(pos);
@@ -228,8 +297,14 @@ export class Board {
             this.selectedPos = null;
             this.clearHighlights();
             this.draw(); // Обновляем доску после убийства
-            console.log("Игра окончена!");
+            console.log("Игра оконченааааа!");
             (this.scene as MainScene).handleGameUpdate();
+            const winner = attacker.owner === 1 ? 1 : 2;
+            console.log(winner, this.currentPlayer, this.currentPlayer == 1);
+            EventBus.emit("game-over", {
+              isWin: this.currentPlayer == 1,
+              levelId: this.levelId,
+            });
             return; // Завершаем функцию, так как игра окончена
           }
         } else {
@@ -254,7 +329,12 @@ export class Board {
             attacker,
             targetPiece
           );
-          console.log("Уменьшаем количество ходов");
+          console.log(
+            "Уменьшаем количество ходов. Было",
+            this.movesLeft,
+            "Стало",
+            this.movesLeft - 1
+          );
           this.movesLeft--;
           if (this.movesLeft <= 0) {
             this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
@@ -351,6 +431,33 @@ export class Board {
     return this.pieces[pos.y][pos.x];
   }
 
+  public simulateMove(from: BoardPosition, to: BoardPosition): boolean {
+    const piece = this.getPieceAt(from);
+    if (!piece || piece.owner !== this.currentPlayer) return false;
+
+    // Проверяем, можно ли сходить
+    const possibleMoves = piece.getPossibleMoves(this.pieces, from);
+    const possibleAttacks = piece.getPossibleAttacks(this.pieces, from);
+
+    // Ход
+    if (possibleMoves.some((pos) => pos.x === to.x && pos.y === to.y)) {
+      this.pieces[to.y][to.x] = piece;
+      this.pieces[from.y][from.x] = null;
+      this.movesLeft--;
+      return true;
+    }
+
+    // Атака
+    if (possibleAttacks.some((pos) => pos.x === to.x && pos.y === to.y)) {
+      this.pieces[to.y][to.x] = piece;
+      this.pieces[from.y][from.x] = null;
+      this.movesLeft--;
+      return true;
+    }
+
+    return false;
+  }
+
   highlightMoves() {
     this.clearHighlights();
 
@@ -359,20 +466,25 @@ export class Board {
     const piece = this.getPieceAt(this.selectedPos);
     if (!piece) return;
 
+    // Получаем размеры сцены и смещение
+    const width = this.scene.sys.game.config.width as number;
+    const height = this.scene.sys.game.config.height as number;
+    const offsetX = (width - this.gridSize * this.tileSize) / 2;
+    const offsetY = (height - this.gridSize * this.tileSize) / 2;
+
     const moves = piece.getPossibleMoves(this.pieces, this.selectedPos);
 
     for (const move of moves) {
-      // Не подсвечиваем, если на клетке своя фигура (уже должна быть отфильтрована в getPossibleMoves, но для надежности)
       const targetPiece = this.getPieceAt(move);
       if (targetPiece && targetPiece.owner === piece.owner) continue;
 
       const highlight = this.scene.add
         .rectangle(
-          move.x * this.tileSize + this.tileSize / 2,
-          move.y * this.tileSize + this.tileSize / 2,
+          offsetX + move.x * this.tileSize + this.tileSize / 2,
+          offsetY + move.y * this.tileSize + this.tileSize / 2,
           this.tileSize,
           this.tileSize,
-          0x00ff00, // Зеленый для хода
+          0x00ff00,
           0.4
         )
         .setDepth(1);
@@ -381,13 +493,11 @@ export class Board {
 
     const attacks = piece.getPossibleAttacks(this.pieces, this.selectedPos);
     for (const attack of attacks) {
-      // Проверяем, не является ли это уже подсвеченным ходом (например, у пешки ходы = атаки)
       const isAlreadyHighlightedAsMove = moves.some(
         (m) => m.x === attack.x && m.y === attack.y
       );
       const targetPiece = this.getPieceAt(attack);
 
-      // Подсвечиваем атаку, если это фигура противника или замок, и это не дублируется как обычный ход
       if (
         (targetPiece && targetPiece.owner !== piece.owner) ||
         (attack.x === this.castlePos[1].x &&
@@ -398,14 +508,13 @@ export class Board {
           piece.owner !== 2)
       ) {
         if (!isAlreadyHighlightedAsMove) {
-          // Избегаем двойной подсветки (зеленым и желтым)
           const highlight = this.scene.add
             .rectangle(
-              attack.x * this.tileSize + this.tileSize / 2,
-              attack.y * this.tileSize + this.tileSize / 2,
+              offsetX + attack.x * this.tileSize + this.tileSize / 2,
+              offsetY + attack.y * this.tileSize + this.tileSize / 2,
               this.tileSize,
               this.tileSize,
-              0xffff00, // Желтый для атаки
+              0xffff00,
               0.4
             )
             .setDepth(1);
@@ -413,26 +522,6 @@ export class Board {
         }
       }
     }
-
-    // Подсветка замков, если они могут быть атакованы (уже учтено в цикле выше, но можно оставить для ясности)
-    // Удаляем этот блок, так как он дублируется с логикой выше
-    // for (const [player, pos] of Object.entries(this.castlePos)) {
-    //   if (+player !== piece.owner) {
-    //     if (attacks.some((a) => a.x === pos.x && a.y === pos.y)) {
-    //       const highlight = this.scene.add
-    //         .rectangle(
-    //           pos.x * this.tileSize + this.tileSize / 2,
-    //           pos.y * this.tileSize + this.tileSize / 2,
-    //           this.tileSize,
-    //           this.tileSize,
-    //           0xff0000,
-    //           0.4
-    //         )
-    //         .setDepth(1);
-    //       this.highlightTiles.push(highlight);
-    //     }
-    //   }
-    // }
   }
 
   clearHighlights() {

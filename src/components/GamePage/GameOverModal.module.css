@@ -1,0 +1,118 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: #2c3e50;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  color: white;
+  text-align: center;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.modalButtons button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.modalButtons button:first-child {
+  background-color: #3498db;
+  color: white;
+}
+
+.modalButtons button:first-child:hover {
+  background-color: #2980b9;
+}
+
+.modalButtons button:last-child {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.modalButtons button:last-child:hover {
+  background-color: #c0392b;
+}
+
+.rewardsSection {
+  margin: 1.5rem 0;
+}
+
+.rewardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.rewardItem {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rewardImage {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  background-color: white;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.rewardInfo {
+  text-align: center;
+}
+
+.rewardName {
+  font-size: 0.8rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.rewardAmount {
+  font-weight: bold;
+  color: #f1c40f;
+}
+
+/* Цвета для редкостей */
+.common {
+  border: 2px solid #bdc3c7;
+}
+
+.rare {
+  border: 2px solid #3498db;
+}
+
+.epic {
+  border: 2px solid #9b59b6;
+}
+
+.legendary {
+  border: 2px solid #f1c40f;
+}

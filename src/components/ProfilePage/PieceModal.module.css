@@ -1,0 +1,331 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: var(--bg-color-dark);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  color: var(--text-color-light);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-color-light);
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: var(--accent-color);
+}
+
+.title {
+  margin: 0 0 1.5rem 0;
+  color: var(--accent-color);
+  text-align: center;
+}
+
+.pieceImage {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin: 0 auto 1rem;
+  display: block;
+  background-color: white;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.stats {
+  margin-bottom: 1.5rem;
+  background-color: var(--bg-color-light);
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.stats p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.levelTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  background-color: var(--bg-color-light);
+}
+
+.levelTable th,
+.levelTable td {
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.levelTable th {
+  background-color: var(--bg-color-darker);
+  color: var(--text-color-light);
+  font-weight: 500;
+}
+
+.currentRow {
+  background-color: rgba(0, 123, 255, 0.1);
+  font-weight: bold;
+}
+
+.upgradeButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.upgradeButton:hover {
+  background-color: var(--accent-hover);
+}
+
+.upgradeButton:disabled {
+  background-color: var(--bg-color-light);
+  cursor: not-allowed;
+}
+
+.maxLevelNote {
+  font-style: italic;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0.75rem;
+  background-color: var(--bg-color-light);
+  border-radius: 4px;
+}
+
+/* Иконки характеристик */
+.statIcon {
+  margin-right: 0.5rem;
+  color: var(--accent-color);
+}
+.upgradeCost {
+  margin: 1.5rem 0;
+  background-color: var(--bg-color-light);
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.upgradeCost h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--accent-color);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.upgradeCost ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.upgradeCost li {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-color-darker);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.upgradeCost li::before {
+  content: "•";
+  color: var(--accent-color);
+  margin-right: 0.5rem;
+  font-weight: bold;
+}
+
+/* Добавляем новые стили в конец файла */
+
+.pieceImageContainer {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  transition: all 0.3s ease;
+}
+
+.upgradeAnimation {
+  animation: pulseGlow 1.5s ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 var(--accent-color));
+  }
+  50% {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 20px var(--accent-color));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 var(--accent-color));
+  }
+}
+
+.upgradeParticles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  animation: particleFly 1.5s ease-out forwards;
+  box-shadow: 0 0 10px 2px var(--accent-color);
+}
+
+@keyframes particleFly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+        calc(var(--random-x) * 150px - 75px),
+        calc(var(--random-y) * 150px - 75px)
+      )
+      scale(0.5);
+    opacity: 0;
+  }
+}
+
+.upgradeButton {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.upgradeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.upgradeButton:disabled {
+  position: relative;
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.upgradeButton:disabled::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    transparent,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent,
+    transparent
+  );
+  transform: rotate(30deg);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(30deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(30deg);
+  }
+}
+
+.levelUpEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(
+    circle,
+    var(--accent-color) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 0;
+  animation: levelUpFade 1.5s ease-out;
+}
+
+@keyframes levelUpFade {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+.stats p {
+  transition: all 0.3s ease;
+}
+
+.statIncrease {
+  animation: statBounce 0.5s ease-out;
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+@keyframes statBounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

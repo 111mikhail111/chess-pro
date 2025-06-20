@@ -1,0 +1,58 @@
+/* Добавляем новые стили для страницы уровней */
+.levelsContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.levelsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.levelCard {
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  padding: 20px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 1px solid #444;
+}
+
+.levelCard:hover {
+  transform: scale(1.05);
+  border-color: #55ff55;
+}
+
+.difficultyBadge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8em;
+  margin-top: 10px;
+}
+
+/* Для разных уровней сложности */
+.difficultyBadge[data-difficulty="Легкий"] {
+  background-color: #55ff55;
+  color: black;
+}
+
+.difficultyBadge[data-difficulty="Средний"] {
+  background-color: #ffcc00;
+  color: black;
+}
+
+.difficultyBadge[data-difficulty="Сложный"] {
+  background-color: #ff5555;
+  color: white;
+}

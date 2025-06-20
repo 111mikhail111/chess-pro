@@ -1,34 +1,58 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./ProfilePage.module.css";
 import { AuthModal } from "./ProfilePage/AuthModal";
+import { useUser } from "../contexts/UserContext";
+import PieceModal from "./ProfilePage/PieceModal";
+import Inventory from "./ProfilePage/Inventory";
 
-interface User {
-  userId: number;
-  username: string;
-  email: string;
-  avatarUrl?: string;
-  experience: number;
-  level: number;
-  rating?: number;
-}
+// Все возможные фигуры в игре
+
+type Piece = {
+  id: string;
+  name: string;
+  type: string;
+  imageUrl?: string;
+  isUnlocked: boolean;
+  unlockLevel?: number;
+  currentLevel?: number;
+};
 
 const ProfilePage: React.FC = () => {
-  // Пример данных игрока
-  const playerData = {
-    name: "Шахматный Мастер",
-    level: 24,
-    experience: 65, // в процентах
-    unlockedPieces: ["king", "knight", "pawn", "archer", "cannon", "mage"],
-    lockedPieces: ["dragon", "ninja", "wizard", "queen", "rook", "bishop"],
-    chests: 3,
-  };
+  const { user, login, logout } = useUser();
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
+  const [pieces, setPieces] = React.useState<Piece[]>([]);
+  const [selectedPiece, setSelectedPiece] = React.useState<any>(null);
+  const [pieceLevels, setPieceLevels] = React.useState([]);
 
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [user, setUser] = useState<User>();
+  React.useEffect(() => {
+    const fetchPieces = async () => {
+      try {
+        const response = await fetch(
+          `/api/pieces/collection?userId=${user?.userId}`
+        );
+        const data = await response.json();
+        console.log("Загруженные фигуры:", data.pieces);
+        setPieces(data.pieces);
+      } catch (err) {
+        console.error("Ошибка загрузки фигур:", err);
+      }
+    };
+
+    if (user?.userId) {
+      fetchPieces();
+    }
+  }, [user]);
 
   const handleLoginSuccess = (userData: any) => {
-    console.log(userData);
-    setUser(userData);
+    login({
+      userId: userData.id,
+      username: userData.username,
+      email: userData.email,
+      avatarUrl: userData.avatarUrl,
+      experience: userData.experience,
+      level: userData.level,
+      rating: userData.rating,
+    });
     setShowAuthModal(false);
   };
 
@@ -41,34 +65,36 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  // Получаем XP для следующего уровня
   function getNextLevelXP(level: number): number {
     return (level + 1) * 1000;
   }
 
-  // Все возможные фигуры в игре
-  const allPieces = [
-    { id: "king", name: "Король" },
-    { id: "knight", name: "Конь" },
-    { id: "pawn", name: "Пешка" },
-    { id: "archer", name: "Лучник" },
-    { id: "cannon", name: "Пушка" },
-    { id: "mage", name: "Маг" },
-    { id: "queen", name: "Ферзь" },
-    { id: "rook", name: "Ладья" },
-    { id: "bishop", name: "Слон" },
-    { id: "dragon", name: "Дракон" },
-    { id: "ninja", name: "Ниндзя" },
-    { id: "wizard", name: "Волшебник" },
-  ];
+  // Пример данных для демонстрации (в реальном приложении это будет из базы данных)
+  const playerData = {
+    chests: 3,
+    unlockedPieces: ["king", "knight", "pawn", "archer", "cannon", "mage"],
+  };
+
+  const handlePieceClick = async (piece: any) => {
+    if (!piece.isUnlocked) return;
+
+    try {
+      const res = await fetch(`/api/pieces/${piece.id}/levels`);
+      const data = await res.json();
+      setSelectedPiece(piece);
+      setPieceLevels(data.levels);
+    } catch (err) {
+      console.error("Ошибка при получении данных о фигуре:", err);
+    }
+  };
+
+  
 
   return (
     <div className={styles.profileContainer}>
-      {/* Блок информации об игроке */}
       {user ? (
         <>
           <div className={styles.playerInfo}>
-            {/* Аватар и имя */}
             <div className={styles.profileHeader}>
               {user.avatarUrl && (
                 <img
@@ -78,9 +104,11 @@ const ProfilePage: React.FC = () => {
                 />
               )}
               <h1 className={styles.playerName}>{user.username}</h1>
+              <button onClick={logout} className={styles.logoutButton}>
+                Выйти
+              </button>
             </div>
 
-            {/* Уровень и прогресс */}
             <div className={styles.levelContainer}>
               <div className={styles.levelBadge}>Уровень {user.level}</div>
               <div className={styles.expBar}>
@@ -99,7 +127,6 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Дополнительная информация */}
             <div className={styles.stats}>
               <div className={styles.statItem}>
                 <span className={styles.statLabel}>Рейтинг:</span>
@@ -112,7 +139,6 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Блок сундуков */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Сундуки</h2>
             <div className={styles.chestsContainer}>
@@ -125,24 +151,30 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Блок персонажей */}
+          <Inventory/>
+
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Коллекция персонажей</h2>
             <div className={styles.piecesGrid}>
-              {allPieces.map((piece) => {
-                const isUnlocked = playerData.unlockedPieces.includes(piece.id);
+              {pieces.map((piece) => {
+                const isUnlocked = piece.isUnlocked;
+
                 return (
                   <div
                     key={piece.id}
                     className={`${styles.pieceCard} ${
-                      !isUnlocked ? styles.locked : ""
+                      !piece.isUnlocked ? styles.locked : ""
                     }`}
+                    onClick={() => handlePieceClick(piece)}
                   >
                     <div className={styles.pieceImageContainer}>
                       <div className={styles.pieceImage}>
                         {isUnlocked ? (
                           <img
-                            src={`/sprites/${piece.id}_white.png`}
+                            src={
+                              piece.imageUrl ||
+                              `/sprites/${piece.type}_white.png`
+                            }
                             alt={piece.name}
                             className={styles.pieceSprite}
                           />
@@ -151,10 +183,18 @@ const ProfilePage: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    <div className={styles.pieceName}>{piece.name}</div>
+                    <div className={styles.pieceName}>
+                      {piece.name}
+                      {piece.isUnlocked && (
+                        <span className={styles.pieceLevel}>
+                          {" "}
+                          — ур. {piece.currentLevel}
+                        </span>
+                      )}
+                    </div>
                     {!isUnlocked && (
                       <div className={styles.unlockHint}>
-                        Откроется на 30 уровне
+                        Откроется на {piece.unlockLevel} уровне
                       </div>
                     )}
                   </div>
@@ -168,7 +208,7 @@ const ProfilePage: React.FC = () => {
           onClick={() => setShowAuthModal(true)}
           className={styles.authButton}
         >
-          Login / Register
+          Войти / Зарегистрироваться
         </button>
       )}
 
@@ -176,6 +216,23 @@ const ProfilePage: React.FC = () => {
         <AuthModal
           onClose={() => setShowAuthModal(false)}
           onLoginSuccess={handleLoginSuccess}
+        />
+      )}
+      {selectedPiece && (
+        <PieceModal
+          piece={selectedPiece}
+          levels={pieceLevels}
+          onClose={() => {
+            setSelectedPiece(null);
+            setPieceLevels([]);
+          }}
+          onUpgrade={() => {
+            const newLevel = selectedPiece.currentLevel + 1;
+            setSelectedPiece((prev : any) => ({
+              ...prev,
+              currentLevel: newLevel,
+            }));
+          }}
         />
       )}
     </div>

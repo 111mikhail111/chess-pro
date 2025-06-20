@@ -5,6 +5,10 @@ import InfoBlock from "./GamePage/InfoBlock";
 import SelectedPieceBlock from "./GamePage/SelectedPieceBlock";
 import styles from "./GamePage.module.css";
 import EventBus from "../game/EventBus";
+import { useLocation } from "react-router-dom";
+import GameOverModal from "./GamePage/GameOverModal";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 interface GameState {
   currentPlayer: "white" | "black";
@@ -14,9 +18,28 @@ interface GameState {
   moveHistory: string[];
 }
 
+interface Level {
+  id: number;
+  name: string;
+  initialPieces: Array<{
+    type: string;
+    owner: number;
+    x: number;
+    y: number;
+  }>;
+}
+
+interface LocationState {
+  level?: Level;
+}
+
 const GamePage: React.FC = () => {
   const gameRef = useRef<HTMLDivElement>(null); // Ссылка на div, куда будет вставляться игра Phaser
 
+  const { user } = useUser();
+  console.log("User data in gamepage:", user);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [gameState, setGameState] = useState<GameState>({
     currentPlayer: "white",
     movesLeft: 3,
@@ -26,6 +49,7 @@ const GamePage: React.FC = () => {
   });
 
   const [selectedPiece, setSelectedPiece] = useState<any>(null);
+  const [currentLevelId, setCurrentLevelId] = useState<number | null>(null);
 
   useEffect(() => {
     const handleGameUpdate = (data: any) => {
@@ -78,19 +102,98 @@ const GamePage: React.FC = () => {
     if (gameRef.current) {
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        width: 680,
-        height: 680,
-        parent: gameRef.current, // Используем useRef для привязки к конкретному div
+        width: 800,
+        height: 800,
+        parent: gameRef.current,
         scene: [MainScene],
       };
+
       const game = new Phaser.Game(config);
 
-      // Очистка Phaser игры при размонтировании компонента
+      setTimeout(() => {
+        const locationState = location.state as LocationState;
+        const levelData = locationState?.level;
+
+        if (levelData) {
+          setCurrentLevelId(levelData.id); // Сохраняем id уровня
+          console.log("Эмитим данные уровня:", levelData);
+          EventBus.emit("load-level", levelData);
+        }
+      }, 500);
+
       return () => {
         game.destroy(true);
       };
     }
-  }, []); // Пустой массив зависимостей означает, что эффект выполнится один раз при монтировании
+  }, [location.state]);
+
+  const [gameOver, setGameOver] = useState<{
+    isOpen: boolean;
+    isWin: boolean;
+  }>({ isOpen: false, isWin: false });
+
+  useEffect(() => {
+    if (user == null) return;
+    const handleGameOver = async (result: {
+      isWin: boolean;
+      levelId?: number;
+    }) => {
+      setGameOver({ isOpen: true, isWin: result.isWin });
+      console.log("Game over:", result);
+      if (result.isWin && result.levelId) {
+        try {
+          await completeLevel(result.levelId);
+          console.log("Level marked as completed");
+        } catch (error) {
+          console.error("Failed to mark level as completed:", error);
+          // Можно добавить уведомление пользователю об ошибке
+        }
+      }
+    };
+
+    EventBus.on("game-over", handleGameOver);
+
+    return () => {
+      EventBus.off("game-over", handleGameOver);
+    };
+  }, [user]);
+
+  const handleRestart = () => {
+    setGameOver({ isOpen: false, isWin: false });
+    // Перезапуск игры
+    EventBus.emit("restart-game");
+  };
+
+  const handleBackToLevels = () => {
+    navigate("/levels"); // Предполагается, что у вас есть маршрут /levels
+  };
+
+  const completeLevel = async (levelId: number) => {
+    console.log("Completing level:", levelId, "user:", user?.userId);
+    if (!user?.userId) {
+      console.log("User is not authenticated");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/levels/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ levelId, userId: user?.userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error completing level:", error);
+      throw error;
+    }
+  };
 
   return (
     <>
@@ -117,6 +220,13 @@ const GamePage: React.FC = () => {
           <SelectedPieceBlock piece={selectedPiece} />
         </div>
       </div>
+      <GameOverModal
+        isOpen={gameOver.isOpen}
+        isWin={gameOver.isWin}
+        onRestart={handleRestart}
+        onBackToLevels={handleBackToLevels}
+        levelId={currentLevelId ?? 0}
+      />
     </>
   );
 };
