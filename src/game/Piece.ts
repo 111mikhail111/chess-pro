@@ -19,6 +19,7 @@ export class Piece {
   hp: number;
   attack: number;
   owner: number; // 1 или 2 - игрок
+  price: number;
 
   constructor(type: PieceType, owner: number) {
     this.type = type;
@@ -28,6 +29,7 @@ export class Piece {
     // Инициализация базовых HP и атаки
     this.hp = 0;
     this.attack = 0;
+    this.price = 0;
     this.initializeStats(type);
   }
 
@@ -35,21 +37,27 @@ export class Piece {
     if (type === "king") {
       this.hp = 30;
       this.attack = 10;
+      this.price = 5;
     } else if (type === "pawn") {
       this.hp = 10;
       this.attack = 5;
+      this.price = 1;
     } else if (type === "cannon") {
       this.hp = 10;
       this.attack = 5;
+      this.price = 2;
     } else if (type === "knight") {
       this.hp = 15;
       this.attack = 7;
+      this.price = 3;
     } else if (type === "archer") {
       this.hp = 12;
       this.attack = 6;
+      this.price = 2;
     } else if (type === "mage") {
       this.hp = 5;
       this.attack = 3;
+      this.price = 1;
     }
   }
 

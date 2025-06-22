@@ -1,11 +1,12 @@
 import { Board } from "./Board";
 import { AiLogic } from "./AiLogic";
 import type { MainScene } from "./MainScene";
-import { type BoardPosition, type Piece } from "./Piece";
+import { type BoardPosition, type Piece, type PieceType } from "./Piece";
 import { AiLogic2 } from "./AiLogic2";
 import { King } from "./pieces/King";
 import { Pawn } from "./pieces/Pawn";
 import { PieceRegistry } from "./PieceRegistry";
+import EventBus from "./EventBus";
 
 export class Game {
   public board: Board;
@@ -13,6 +14,8 @@ export class Game {
   private ai2: AiLogic2;
   private isAgainstAI: boolean;
   private scene: MainScene;
+  public isPlacementPhase = true; // <--- ДОБАВИТЬ
+  private selectedPieceTypeForPlacement: PieceType | null = null;
 
   constructor(scene: MainScene, againstAI: boolean = false) {
     this.scene = scene;
@@ -20,14 +23,58 @@ export class Game {
     this.board = new Board(scene);
     this.ai = new AiLogic2(2, this.board); // ИИ играет за игрока 2
     this.ai2 = new AiLogic2(1, this.board); // ИИ играет за игрока 1
+    this.setupEventListeners();
+  }
+
+  private setupEventListeners(): void {
+    EventBus.on("select-piece-for-placement", (pieceType: PieceType) => {
+      this.selectedPieceTypeForPlacement = pieceType;
+      console.log(`Фигура для расстановки выбрана: ${pieceType}`);
+    });
+
+    EventBus.on("start-battle", () => {
+      console.log("Получена команда начала боя!");
+      this.isPlacementPhase = false;
+      this.selectedPieceTypeForPlacement = null;
+      // Можно добавить дополнительную логику, если нужно
+    });
   }
 
   public handleClick(pos: BoardPosition): void {
+    if (this.isPlacementPhase) {
+      this.handlePlacementClick(pos); // <--- ВЫЗВАТЬ НОВУЮ ФУНКЦИЮ
+      return;
+    }
+
     if (this.isAgainstAI && this.board.currentPlayer !== 1) {
       console.log("Сейчас ход компьютера!");
       return;
     }
     this.board.handleClick(pos);
+  }
+
+  private handlePlacementClick(pos: BoardPosition): void {
+    if (!this.selectedPieceTypeForPlacement) {
+      console.log("Сначала выберите фигуру для расстановки из списка.");
+      return;
+    }
+
+    const isValidPlacement = this.board.isValidPlacement(pos);
+
+    if (isValidPlacement) {
+      this.board.placePiece(pos, this.selectedPieceTypeForPlacement, 1);
+      console.log(
+        `Фигура ${this.selectedPieceTypeForPlacement} установлена на`,
+        pos
+      );
+
+      // Убедитесь, что это событие отправляется. В качестве данных - тип фигуры.
+      EventBus.emit("piece-placed", this.selectedPieceTypeForPlacement);
+
+      this.selectedPieceTypeForPlacement = null;
+    } else {
+      console.log("Нельзя поставить фигуру сюда!");
+    }
   }
 
   public async makeAIMoveTurn(): Promise<void> {
@@ -103,21 +150,19 @@ export class Game {
   }
 
   public loadLevel(levelData: any) {
-    // Очищаем текущую доску
     this.board = new Board(this.scene);
     this.setLevelId(levelData.id);
-    // Загружаем фигуры из уровня
+
     levelData.initialPieces.forEach((pieceData: any) => {
-      const PieceClass =
-        PieceRegistry[pieceData.type as keyof typeof PieceRegistry];
-
-      if (!PieceClass) {
-        console.error(`Unknown piece type: ${pieceData.type}`);
-        return;
+      // ЗАГРУЖАЕМ ТОЛЬКО ФИГУРЫ ПРОТИВНИКА (owner === 2)
+      if (pieceData.owner === 2) {
+        const PieceClass =
+          PieceRegistry[pieceData.type as keyof typeof PieceRegistry];
+        if (PieceClass) {
+          const piece = new PieceClass(pieceData.owner);
+          this.board.pieces[pieceData.y][pieceData.x] = piece;
+        }
       }
-
-      const piece = new PieceClass(pieceData.owner);
-      this.board.pieces[pieceData.y][pieceData.x] = piece;
     });
 
     this.ai = new AiLogic2(2, this.board);

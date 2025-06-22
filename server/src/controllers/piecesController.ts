@@ -14,7 +14,7 @@ export const getUserPiecesCollection = async (
     }
 
     const allPiecesResult = await query(`
-      SELECT piece_id, name, type, unlock_level, description, image_url
+      SELECT piece_id, name, type, unlock_level, description, image_url, price
       FROM pieces
     `);
 
@@ -35,6 +35,7 @@ export const getUserPiecesCollection = async (
       unlockLevel: piece.unlock_level,
       description: piece.description,
       imageUrl: piece.image_url,
+      price: piece.price,
       isUnlocked: unlockedMap.has(piece.piece_id),
       currentLevel: unlockedMap.get(piece.piece_id) || null,
     }));

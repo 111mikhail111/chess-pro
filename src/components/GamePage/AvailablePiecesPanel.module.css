@@ -1,0 +1,215 @@
+.container {
+  background-color: var(--bg-color-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  margin: 0 0 1.5rem 0;
+  color: var(--accent-color);
+  font-size: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.piecesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+
+.pieceItem {
+  position: relative;
+  background-color: var(--bg-color-darker);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.pieceItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pieceItem.selected {
+  border-color: var(--accent-color);
+  background-color: rgba(var(--accent-rgb), 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(var(--accent-rgb), 0.3);
+}
+
+.pieceImageContainer {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 0.75rem;
+  border-radius: 50%;
+  background-color: white;
+  padding: 5px;
+}
+
+.pieceImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+}
+
+.pieceImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-color-light);
+}
+
+.selectionIndicator {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-color);
+  pointer-events: none;
+}
+
+.pulseEffect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+  opacity: 0.2;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 0.1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+}
+
+.pieceInfo {
+  text-align: center;
+}
+
+.pieceName {
+  font-weight: 600;
+  color: var(--text-color-light);
+  font-size: 0.9rem;
+  display: block;
+}
+
+.pieceLevel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.locked {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+  cursor: not-allowed;
+}
+
+.lockOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.lockIcon {
+  font-size: 1.5rem;
+  color: var(--accent-color);
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
+.unaffordable {
+  opacity: 0.6;
+  filter: grayscale(0.7);
+  position: relative;
+}
+
+.unaffordable:hover {
+  transform: none !important;
+  cursor: not-allowed;
+}
+
+.unaffordable::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(231, 76, 60, 0.2);
+  border-radius: 8px;
+}
+
+/* Стили для цены */
+.pieceDetails {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 0.25rem;
+  align-items: center;
+}
+
+.piecePrice {
+  font-size: 0.7rem;
+  color: var(--accent-color);
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+.unaffordablePrice {
+  color: #e74c3c;
+  text-decoration: line-through;
+}
+
+/* Индикатор недостатка очков */
+.pointsWarning {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #e74c3c;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  z-index: 2;
+}

@@ -9,6 +9,8 @@ import { useLocation } from "react-router-dom";
 import GameOverModal from "./GamePage/GameOverModal";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import AvailablePiecesPanel from "./GamePage/AvailablePiecesPanel";
+import { Piece } from "../game/Piece";
 
 interface GameState {
   currentPlayer: "white" | "black";
@@ -33,6 +35,16 @@ interface LocationState {
   level?: Level;
 }
 
+type Piecetype = {
+  id: string;
+  name: string;
+  type: string;
+  imageUrl?: string;
+  isUnlocked: boolean;
+  currentLevel?: number;
+  price: number;
+};
+
 const GamePage: React.FC = () => {
   const gameRef = useRef<HTMLDivElement>(null); // Ссылка на div, куда будет вставляться игра Phaser
 
@@ -50,6 +62,60 @@ const GamePage: React.FC = () => {
 
   const [selectedPiece, setSelectedPiece] = useState<any>(null);
   const [currentLevelId, setCurrentLevelId] = useState<number | null>(null);
+  const [isPlacementPhase, setIsPlacementPhase] = useState(true); // <--- ДОБАВИТЬ ЭТО
+  const [availablePieces, setAvailablePieces] = useState<Piecetype[]>([]); // <--- ДОБАВИТЬ ЭТО
+  const [selectedPieceForPlacement, setSelectedPieceForPlacement] = useState<
+    any | null
+  >(null);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [remainingPoints, setRemainingPoints] = useState(0);
+
+  useEffect(() => {
+    if (user?.level) {
+      const calculatedPoints = 5 + 2 * user.level;
+      setTotalPoints(calculatedPoints);
+      setRemainingPoints(calculatedPoints);
+    }
+  }, [user]);
+
+  const handleSelectPieceForPlacement = (piece: any) => {
+    // ПРОВЕРКА ОЧКОВ
+    if (piece.price > remainingPoints) {
+      console.log("Недостаточно очков!");
+      // Можно показать пользователю уведомление
+      return; // Не даем выбрать фигуру
+    }
+
+    setSelectedPieceForPlacement(piece);
+    EventBus.emit("select-piece-for-placement", piece.type);
+  };
+
+  const handleStartBattle = () => {
+    setIsPlacementPhase(false);
+    setSelectedPieceForPlacement(null);
+    // Отправляем событие в Phaser, что расстановка закончена
+    EventBus.emit("start-battle");
+  };
+
+  useEffect(() => {
+    const fetchPieces = async () => {
+      try {
+        const response = await fetch(
+          `/api/pieces/collection?userId=${user?.userId}`
+        );
+        const data = await response.json();
+        console.log("Загруженные фигуры:", data.pieces);
+        setAvailablePieces(data.pieces);
+      } catch (err) {
+        console.error("Ошибка загрузки фигур:", err);
+      }
+    };
+
+    if (user?.userId && isPlacementPhase) {
+      // Загружаем только в фазе расстановки
+      fetchPieces();
+    }
+  }, [user, isPlacementPhase]);
 
   useEffect(() => {
     const handleGameUpdate = (data: any) => {
@@ -195,6 +261,22 @@ const GamePage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handlePiecePlaced = (pieceType: string) => {
+      // Находим фигуру в нашем списке, чтобы узнать её цену
+      const placedPiece = availablePieces.find((p) => p.type === pieceType);
+      if (placedPiece) {
+        setRemainingPoints((prevPoints) => prevPoints - placedPiece.price);
+      }
+    };
+
+    EventBus.on("piece-placed", handlePiecePlaced);
+
+    return () => {
+      EventBus.off("piece-placed", handlePiecePlaced);
+    };
+  }, [availablePieces]);
+
   return (
     <>
       <div className={styles.container}>
@@ -217,7 +299,32 @@ const GamePage: React.FC = () => {
         </div>
 
         <div className={styles.sidePanel}>
-          <SelectedPieceBlock piece={selectedPiece} />
+          {isPlacementPhase ? (
+            <div>
+              {/* ДОБАВИТЬ ЭТОТ БЛОК */}
+              <div className={styles.pointsContainer}>
+                <h3>Очки расстановки</h3>
+                <div className={styles.pointsValue}>
+                  {remainingPoints} / {totalPoints}
+                </div>
+              </div>
+              {/* КОНЕЦ БЛОКА */}
+              <AvailablePiecesPanel
+                pieces={availablePieces}
+                onSelectPiece={handleSelectPieceForPlacement}
+                selectedPieceType={selectedPieceForPlacement?.type}
+                remainingPoints={remainingPoints}
+              />
+              <button
+                onClick={handleStartBattle}
+                className={styles.startButton}
+              >
+                Начать бой
+              </button>
+            </div>
+          ) : (
+            <SelectedPieceBlock piece={selectedPiece} />
+          )}
         </div>
       </div>
       <GameOverModal

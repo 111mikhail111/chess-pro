@@ -9,6 +9,7 @@ import { Mage } from "./pieces/Mage";
 import type { MainScene } from "./MainScene";
 import EventBus from "./EventBus";
 import type { Game } from "./Game";
+import { PieceRegistry } from "./PieceRegistry";
 
 export interface BoardPosition {
   x: number;
@@ -578,5 +579,28 @@ export class Board {
       mage: "Маг",
     };
     return `${names[type]} ${owner === 1 ? "белых" : "чёрных"}`;
+  }
+
+  public placePiece(
+    pos: BoardPosition,
+    pieceType: PieceType,
+    owner: number
+  ): void {
+    const PieceClass = PieceRegistry[pieceType as keyof typeof PieceRegistry];
+    if (PieceClass) {
+      const newPiece = new PieceClass(owner);
+      this.pieces[pos.y][pos.x] = newPiece;
+      this.draw(); // Перерисовываем доску, чтобы показать новую фигуру
+    }
+  }
+
+  // Новый метод для проверки, можно ли сюда ставить фигуру
+  public isValidPlacement(pos: BoardPosition): boolean {
+    // Пример: ставить можно только на пустые клетки на своей половине поля (y > 3)
+    const pieceAtPos = this.getPieceAt(pos);
+    const isCellEmpty = pieceAtPos === null;
+    const isPlayerSide = pos.y > 3; // Для доски 8x8, своя половина - ряды 4-7
+
+    return isCellEmpty && isPlayerSide;
   }
 }

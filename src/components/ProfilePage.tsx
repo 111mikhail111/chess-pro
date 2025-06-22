@@ -32,6 +32,7 @@ const ProfilePage: React.FC = () => {
         );
         const data = await response.json();
         console.log("Загруженные фигуры:", data.pieces);
+       
         setPieces(data.pieces);
       } catch (err) {
         console.error("Ошибка загрузки фигур:", err);

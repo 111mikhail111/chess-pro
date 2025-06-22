@@ -22,3 +22,76 @@
   width: 800px;
   height: 800px;
 }
+
+.startButton {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent-color), #f39c12);
+  color: #2c3e50;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(241, 196, 15, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.startButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(241, 196, 15, 0.4);
+}
+
+.startButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(241, 196, 15, 0.3);
+}
+
+.startButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.startButton:hover::before {
+  opacity: 1;
+}
+
+.startButton:disabled {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.startButton:disabled:hover::before {
+  opacity: 0;
+}
+
+/* Анимация для активного состояния */
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(241, 196, 15, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(241, 196, 15, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(241, 196, 15, 0);
+  }
+}
+
+.startButton.pulse {
+  animation: buttonPulse 1.5s infinite;
+}
